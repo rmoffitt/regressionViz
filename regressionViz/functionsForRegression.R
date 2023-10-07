@@ -46,7 +46,7 @@ makeData <- function(features = 2,samples = 10,labels = 1,
   }
   
   # make good names for the data frame
-  fnames <- paste('feature',1:features,sep = ".")
+  fnames <- paste('x',1:features,sep = ".")
   if(labels>0){
     names(df) <- c(fnames,paste('label',1:labels,sep = "."))
   } else {
