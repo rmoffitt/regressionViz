@@ -4,6 +4,88 @@ author: "Richard Moffitt"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-source('./regressionViz/helper_functions.R')
+```{r setup}
+library(stats)
+library(ggplot2)
+```
+
+```{r helper_functions}
+make_simple_linear = function(fnames, coeffs, samples, noise) {
+  # fnames: a list of strings that specify the input variables
+  # coeffs: a list of numbers, starting with the intercept, that specify the coefficients in a model. y = intercept + coeff_1 * variable_1 + coeff_2 * variable_2 ...
+  # samples : the number of samples (rows) to generate
+  # noise : the magnitude of gaussian noise added to y after data generation
+  features = length(fnames)
+  m <- rnorm(n = samples * features)
+  m <- matrix(data = m, nrow = samples)
+  y = coeffs[1] + m%*%coeffs[-1]
+  y = y + rnorm(n = samples,sd = noise)  
+  df = as.data.frame(cbind(m,y))
+  names(df) = c(fnames,'y')
+  return(df)
+}
+```
+
+## One variable
+```{r generate 1v data}
+set.seed(123)
+fnames = c('x1')
+coeffs = c(1,2)
+samples = 25
+noise = 1
+
+df = make_simple_linear(fnames, coeffs, samples, noise)
+summary(df)
+
+p <- ggplot(data = df, aes(x = x1,y=y))
+p <- p + geom_point()
+p <- p + theme_bw()
+p <- p + coord_fixed()
+p <- p + geom_hline(yintercept = 0) + geom_vline(xintercept = 0)
+p <- p + geom_abline(slope = coeffs[2],
+                     intercept = coeffs[1],
+                     color = 'red')
+
+glm_result <- glm(data = df,formula = y ~ x1)
+summary(glm_result)
+learned_coeffs = coefficients(glm_result)
+print(learned_coeffs)
+
+p <- p + geom_abline(slope = learned_coeffs['x1'],
+                     intercept = learned_coeffs['(Intercept)'],
+                     color = 'blue')
+plot(p)
+```
+
+## Three Variables
+
+```{r generate 3v data}
+set.seed(123)
+fnames = c('x1','x2','x3')
+coeffs = c(1,2,1,0.5)
+samples = 25
+noise = 1
+
+df = make_simple_linear(fnames, coeffs, samples, noise)
+summary(df)
+
+glm_result <- glm(data = df,formula = y ~ x1 + x2 +x3)
+summary(glm_result)
+learned_coeffs = coefficients(glm_result)
+print(learned_coeffs)
+```
+
+## User exercises
+
+```{r}
+set.seed(123)
+fnames = c('x1','x2','x3')
+# coeffs = c(1,2,1,0.5)
+# samples = 25
+# noise = 1
+
+df = make_simple_linear(fnames, coeffs, samples, noise)
+glm_result <- glm(data = df,formula = y ~ x1 + x2 +x3)
+summary(glm_result)
+
 ```
