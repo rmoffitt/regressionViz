@@ -1,10 +1,11 @@
 
-helloWorld <- function() {
-  print('Hello, world!')
-}
+# Generate random data with the intention of fitting a model
 
-makeData <- function(features = 2,samples = 10,labels = 1,
+makeData <- function(fnames,samples = 10,labels = 1,
                      rho = NULL, translate = FALSE, skew = FALSE) {
+  features = length(fnames)
+  print(features)
+  print(fnames)
   m <- rnorm(n = samples*(labels + features))*3
   m <- matrix(data = m, nrow = samples)
   
@@ -35,8 +36,8 @@ makeData <- function(features = 2,samples = 10,labels = 1,
       bias = runif(1,min = -2,max = 2)
       df[,i+features] <- bias
       for(j in 1:features){
-      slope = runif(1,min = 0.5,max = 2)
-      df[,i+features] <- df[,i+features] + df[,j]*slope
+        slope = runif(1,min = 0.5,max = 2)
+        df[,i+features] <- df[,i+features] + df[,j]*slope
       }
       df[,i+features] <- 
         boot::inv.logit(df[,i+features])
@@ -46,7 +47,7 @@ makeData <- function(features = 2,samples = 10,labels = 1,
   }
   
   # make good names for the data frame
-  fnames <- paste('x',1:features,sep = ".")
+  # fnames <- paste('feature',1:features,sep = ".")
   if(labels>0){
     names(df) <- c(fnames,paste('label',1:labels,sep = "."))
   } else {
@@ -54,10 +55,5 @@ makeData <- function(features = 2,samples = 10,labels = 1,
   }
   snames <- paste('sample',1:samples,sep = ".")
   row.names(df) <- snames
-  
-
   return(df)
-  
 }
-
-
