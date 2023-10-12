@@ -90,3 +90,42 @@ glm_result <- glm(data = df,formula = y ~ x1 + x2 +x3)
 summary(glm_result)
 
 ```
+
+
+## One variable logistic
+```{r generate 1v logistic data}
+set.seed(123)
+fnames = c('x1')
+coeffs = c(1,4)
+samples = 100
+noise = 0
+
+df = make_simple_linear(fnames, coeffs, samples, noise)
+# same as before but now we need to turn some underlying risk (y) into a 
+df$probability <- 1/(1+exp(df$y*-1))
+df$observation = NA
+for(i in 1:length(df$probability)){
+  df$observation[i] = rbinom(1,1,df$probability[i])
+}
+
+p <- ggplot(data = df, aes(x = x1,y=observation))
+p <- p + geom_point()
+p <- p + theme_bw()
+p <- p + coord_fixed()
+p <- p + geom_hline(yintercept = 0) + geom_vline(xintercept = 0)
+
+glm_result <- glm(data = df,formula = observation ~ x1, family = binomial)
+summary(glm_result)
+learned_coeffs = coefficients(glm_result)
+print(learned_coeffs)
+
+some_xs = seq(from = -3, to = 3, by = 0.1)
+true_probs = 1/(1+exp(some_xs*coeffs[2]*-1-coeffs[1]))
+pedicted_probs = 1/(1+exp(some_xs*learned_coeffs[2]*-1-learned_coeffs[1]))
+our_line = data.frame(x = some_xs, y = true_probs, yhat = pedicted_probs)
+
+p <- p + geom_line(data = our_line, aes(x = x,y = y),color = "red")
+p <- p + geom_line(data = our_line, aes(x = x,y = yhat),color = "blue")
+
+plot(p)
+```
